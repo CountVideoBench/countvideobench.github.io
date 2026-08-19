@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CountVideoBench — BMVC 2026</title>
+<meta name="description" content="CountVideoBench: A Benchmark to Evaluate Prediction Biases on the Object Counting task by Video-Language Models. BMVC 2026.">
+
+<!-- Open Graph : ce qui s'affiche quand le lien est partagé sur X, Bluesky, Slack -->
+<meta property="og:title" content="CountVideoBench">
+<meta property="og:description" content="A benchmark to evaluate prediction biases on the object counting task by video-language models. BMVC 2026.">
+<meta property="og:url" content="https://countvideobench.github.io">
+<meta property="og:type" content="website">
+<!-- TODO : ajouter une image d'aperçu 1200x630 quand la heatmap sera exportée
+<meta property="og:image" content="https://countvideobench.github.io/preview.png"> -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ground:#F7F8FA;
+    --rule:#E4E8EE;
+    --ink:#14171C;
+    --muted:#5A6270;
+    --faint:#9AA2AE;
+    --accent:#2F63B8;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+
+  body{
+    margin:0;
+    min-height:100dvh;
+    display:flex;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:'Archivo',system-ui,-apple-system,sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    /* La trame du sol du dataset : lignes parallèles fines, très peu contrastées */
+    background-image:repeating-linear-gradient(
+      98deg,
+      transparent 0px,
+      transparent 21px,
+      rgba(20,23,28,.035) 21px,
+      rgba(20,23,28,.035) 22px
+    );
+  }
+
+  /* Lumière d'atelier : cinq sources, chute douce vers les bords */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(120% 80% at 50% 0%,rgba(255,255,255,.95) 0%,rgba(255,255,255,.55) 45%,rgba(255,255,255,0) 100%);
+  }
+
+  .wrap{
+    position:relative;
+    margin:auto;
+    max-width:780px;
+    width:100%;
+    padding:72px 24px;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 22px;
+  }
+
+  h1{
+    font-size:clamp(40px,7vw,68px);
+    font-weight:700;
+    letter-spacing:-.035em;
+    line-height:1.02;
+    margin:0 0 18px;
+  }
+
+  .subtitle{
+    font-size:clamp(18px,2.4vw,22px);
+    font-weight:400;
+    line-height:1.35;
+    color:var(--muted);
+    max-width:34ch;
+    margin:0 0 34px;
+  }
+
+  .authors{
+    font-size:15px;
+    line-height:1.5;
+    margin:0 0 4px;
+  }
+
+  .affil{
+    font-size:14px;
+    color:var(--faint);
+    margin:0;
+    max-width:52ch;
+  }
+
+  hr{
+    border:0;
+    border-top:1px solid var(--rule);
+    margin:52px 0;
+  }
+
+  h2{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 20px;
+  }
+
+  .row{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    padding:14px 0;
+    border-top:1px solid var(--rule);
+    flex-wrap:wrap;
+  }
+  .row:last-of-type{border-bottom:1px solid var(--rule);}
+
+  .row .what{
+    font-weight:600;
+    min-width:96px;
+  }
+  .row .when{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  a{
+    color:var(--accent);
+    text-decoration-thickness:1px;
+    text-underline-offset:3px;
+  }
+  a:hover{text-decoration-thickness:2px;}
+  a:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  footer{
+    margin-top:52px;
+    font-size:14px;
+    color:var(--faint);
+  }
+
+  @media (max-width:560px){
+    body{font-size:16px;}
+    .wrap{padding:56px 22px;}
+    hr{margin:40px 0;}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <p class="eyebrow">BMVC 2026</p>
+
+  <h1>CountVideoBench</h1>
+
+  <p class="subtitle">A benchmark to evaluate prediction biases on the object counting task by video-language models.</p>
+
+  <p class="authors">Marc Chapus &middot; Carlos Crispim-Junior &middot; Véronique Eglin &middot; Atilla Baskurt</p>
+  <p class="affil">INSA Lyon, Université Lumière Lyon 2, CNRS, Université Claude Bernard Lyon 1, LIRIS, UMR5205, Villeurbanne, France</p>
+
+  <hr>
+
+  <h2>Release</h2>
+
+  <div class="row">
+    <span class="what">Paper</span>
+    <!-- TODO : remplacer par le lien vers les actes ou l'arXiv dès qu'il existe -->
+    <span class="when">BMVC 2026 proceedings</span>
+  </div>
+  <div class="row">
+    <span class="what">Dataset</span>
+    <!-- TODO : remplacer par le lien Hugging Face, et préciser le mois -->
+    <span class="when">Coming before the conference</span>
+  </div>
+  <div class="row">
+    <span class="what">Code</span>
+    <!-- TODO : décommenter quand le dépôt sera public
+    <a href="https://github.com/CountVideoBench/CountVideoBench">github.com/CountVideoBench</a> -->
+    <span class="when">Coming before the conference</span>
+  </div>
+
+  <footer>
+    <a href="mailto:marc.chapus@liris.cnrs.fr">marc.chapus@liris.cnrs.fr</a>
+  </footer>
+
+</main>
+</body>
+</html>
