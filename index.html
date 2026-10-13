@@ -11,8 +11,8 @@
 <meta property="og:description" content="A benchmark to evaluate prediction biases on the object counting task by video-language models. BMVC 2026.">
 <meta property="og:url" content="https://countvideobench.github.io">
 <meta property="og:type" content="website">
-<!-- TODO : ajouter une image d'aperçu 1200x630 quand la heatmap sera exportée
-<meta property="og:image" content="https://countvideobench.github.io/preview.png"> -->
+<!-- TODO : ajouter une image d'aperçu 1200x630
+<meta property="og:image" content="https://countvideobench.github.io/static/preview.png"> -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,11 +21,15 @@
 <style>
   :root{
     --ground:#F7F8FA;
+    --surface:#FFFFFF;
     --rule:#E4E8EE;
     --ink:#14171C;
     --muted:#5A6270;
     --faint:#9AA2AE;
     --accent:#2F63B8;
+    --bar:#98A1AE;
+    --zone:#EEF1F5;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
   }
 
   *{box-sizing:border-box;}
@@ -34,7 +38,6 @@
   body{
     margin:0;
     min-height:100dvh;
-    display:flex;
     background:var(--ground);
     color:var(--ink);
     font-family:'Archivo',system-ui,-apple-system,sans-serif;
@@ -50,7 +53,7 @@
     );
   }
 
-  /* Lumière d'atelier : cinq sources, chute douce vers les bords */
+  /* Lumière d'atelier : chute douce vers les bords */
   body::before{
     content:"";
     position:fixed;
@@ -61,14 +64,14 @@
 
   .wrap{
     position:relative;
-    margin:auto;
-    max-width:780px;
+    margin:0 auto;
+    max-width:820px;
     width:100%;
     padding:72px 24px;
   }
 
   .eyebrow{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:var(--mono);
     font-size:12px;
     font-weight:500;
     letter-spacing:.14em;
@@ -94,27 +97,25 @@
     margin:0 0 34px;
   }
 
-  .authors{
-    font-size:15px;
-    line-height:1.5;
-    margin:0 0 4px;
-  }
+  .authors{font-size:15px;line-height:1.5;margin:0 0 4px;}
+  .affil{font-size:14px;color:var(--faint);margin:0;max-width:52ch;}
 
-  .affil{
-    font-size:14px;
-    color:var(--faint);
-    margin:0;
-    max-width:52ch;
+  /* Liens principaux */
+  .links{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 0;padding:0;list-style:none;}
+  .links a,.links span{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:13px;font-weight:500;
+    padding:8px 14px;border:1px solid var(--rule);border-radius:6px;
+    background:var(--surface);text-decoration:none;color:var(--ink);
   }
+  .links a:hover{border-color:var(--accent);color:var(--accent);}
+  .links span{color:var(--faint);}
+  .links small{font-size:11px;color:var(--faint);letter-spacing:.04em;}
 
-  hr{
-    border:0;
-    border-top:1px solid var(--rule);
-    margin:52px 0;
-  }
+  hr{border:0;border-top:1px solid var(--rule);margin:56px 0;}
 
   h2{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:var(--mono);
     font-size:12px;
     font-weight:500;
     letter-spacing:.14em;
@@ -122,49 +123,127 @@
     color:var(--muted);
     margin:0 0 20px;
   }
+  p{margin:0 0 14px;}
+  .lead{font-size:18px;max-width:64ch;}
+  .note{font-size:14px;color:var(--muted);}
+  .caption{font-size:14px;color:var(--muted);margin:10px 0 0;}
 
+  a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px;}
+  a:hover{text-decoration-thickness:2px;}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
+  code{font-family:var(--mono);font-size:.88em;}
+
+  /* Vidéos d'exemple */
+  .teaser{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:52px 0 30px;}
+  .teaser figure{margin:0;}
+  .frame{position:relative;aspect-ratio:16/9;background:#EDEFF2;border:1px solid var(--rule);border-radius:6px;overflow:hidden;}
+  .frame video{display:block;width:100%;height:100%;object-fit:cover;}
+  .frame .missing{
+    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:12px;color:var(--faint);
+  }
+  .is-missing .missing{display:flex;}
+  .is-missing video{visibility:hidden;}
+  .teaser figcaption{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:8px;}
+
+  /* Fiche du dataset (reprend les lignes de la version d'origine) */
   .row{
     display:flex;
     align-items:baseline;
     gap:16px;
-    padding:14px 0;
+    padding:12px 0;
     border-top:1px solid var(--rule);
-    flex-wrap:wrap;
   }
   .row:last-of-type{border-bottom:1px solid var(--rule);}
+  .row .what{font-weight:600;min-width:130px;flex-shrink:0;}
+  .row .val{color:var(--ink);}
+  .row .val .m{font-family:var(--mono);font-size:14px;color:var(--muted);}
+  .row .val .m.block{display:block;margin-top:2px;}
 
-  .row .what{
-    font-weight:600;
-    min-width:96px;
+  /* Blocs de code */
+  .code{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    margin:0 0 14px;
   }
-  .row .when{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:14px;
-    color:var(--muted);
+  .code .label{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);padding:10px 16px 0;
   }
+  .code pre{
+    margin:0;padding:10px 16px 16px;overflow-x:auto;
+    font-family:var(--mono);font-size:13.5px;line-height:1.65;
+  }
+  .code .c{color:var(--faint);}
+  .code .s{color:#8A4B12;}
+  .code .k{color:var(--accent);}
+  .copy{
+    position:absolute;top:8px;right:8px;
+    font-family:var(--mono);font-size:11px;
+    padding:4px 10px;border:1px solid var(--rule);border-radius:5px;
+    background:var(--ground);color:var(--muted);cursor:pointer;
+  }
+  .copy:hover{color:var(--ink);border-color:var(--faint);}
 
-  a{
-    color:var(--accent);
-    text-decoration-thickness:1px;
-    text-underline-offset:3px;
-  }
-  a:hover{text-decoration-thickness:2px;}
-  a:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:3px;
-    border-radius:2px;
-  }
+  /* Distributions des benchmarks : une ligne par benchmark, un axe commun */
+  .dists{margin:24px 0 0;}
+  .drow{display:grid;grid-template-columns:136px 1fr 56px;align-items:end;gap:14px;padding:5px 0;}
+  .drow .name{font-size:14px;font-weight:500;line-height:1.2;padding-bottom:2px;}
+  .drow .share{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:right;padding-bottom:2px;}
+  .drow svg{display:block;width:100%;height:40px;border-bottom:1px solid var(--faint);}
+  .drow .zone{fill:var(--zone);}
+  .drow .b{fill:var(--bar);}
+  .drow.ours{margin-top:10px;padding-top:12px;border-top:1px solid var(--rule);}
+  .drow.ours .name{color:var(--accent);font-weight:600;}
+  .drow.ours .share{color:var(--accent);font-weight:500;}
+  .drow.ours .b{fill:var(--accent);}
+  .drow.head{padding:0 0 2px;align-items:end;}
+  .drow.head .share{font-size:11px;color:var(--faint);letter-spacing:.04em;}
+  .drow.axis{padding-top:4px;}
+  .ticks{position:relative;height:16px;}
+  .ticks span{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--faint);}
+  .ticks span.end{transform:translateX(-100%);}
 
-  footer{
-    margin-top:52px;
-    font-size:14px;
-    color:var(--faint);
-  }
+  /* Heatmap */
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .heat{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:10px;min-width:740px;}
+  .heat th{font-weight:400;color:var(--muted);}
+  .heat thead th{font-size:10px;padding:0 0 4px;text-align:center;}
+  .heat tbody th{text-align:right;padding-right:8px;white-space:nowrap;font-size:11px;}
+  .heat td{width:23px;height:21px;text-align:center;border-radius:2px;}
+  .heat .gap{width:5px;padding:0;background:none;}
+  .legend{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted);margin:10px 0 0;}
+  .legend .ramp{width:120px;height:8px;border-radius:2px;background:linear-gradient(90deg,#F3F5F8,#2F63B8);}
+
+  /* Tableau */
+  table.res{width:100%;border-collapse:collapse;font-size:14px;min-width:620px;}
+  table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap;}
+  table.res th:first-child,table.res td:first-child{text-align:left;padding-left:0;}
+  table.res thead th{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--ink);}
+  table.res td{font-family:var(--mono);font-size:13px;}
+  table.res td:first-child{font-family:'Archivo',sans-serif;font-size:14px;}
+  table.res strong{font-weight:600;color:var(--ink);}
+  table.res tr.oracle td{color:var(--faint);border-bottom:0;}
+  .tag{font-family:var(--mono);font-size:10px;color:var(--faint);margin-left:6px;letter-spacing:.04em;}
+
+  .sub{margin-top:34px;}
+
+  footer{margin-top:56px;font-size:14px;color:var(--faint);}
 
   @media (max-width:560px){
     body{font-size:16px;}
-    .wrap{padding:56px 22px;}
-    hr{margin:40px 0;}
+    .wrap{padding:56px 16px;}
+    hr{margin:44px 0;}
+    .teaser{grid-template-columns:1fr 1fr;gap:10px;}
+    .teaser figure:last-child{grid-column:1 / -1;}
+    .drow{grid-template-columns:1fr auto;gap:2px 10px;padding:6px 0;}
+    .drow svg,.drow .ticks{grid-column:1 / -1;grid-row:2;}
+    .drow.head .name{display:none;}
+    .drow.axis > span:first-child,.drow.axis > span:last-child{display:none;}
+    .row{flex-direction:column;gap:2px;}
+    .row .what{min-width:0;}
   }
 </style>
 </head>
@@ -180,31 +259,330 @@
   <p class="authors">Marc Chapus &middot; Carlos Crispim-Junior &middot; Véronique Eglin &middot; Atilla Baskurt</p>
   <p class="affil">INSA Lyon, Université Lumière Lyon 2, CNRS, Université Claude Bernard Lyon 1, LIRIS, UMR5205, Villeurbanne, France</p>
 
+  <ul class="links">
+    <!-- TODO : remplacer par <a href="https://arxiv.org/abs/XXXX.XXXXX">Paper</a> dès que l'arXiv existe -->
+    <li><span>Paper <small>soon</small></span></li>
+    <li><a href="https://huggingface.co/datasets/countvideobench/CountVideoBench">Dataset <small>Hugging Face</small></a></li>
+    <!-- TODO : remplacer par <a href="https://github.com/CountVideoBench/CountVideoBench">Code</a> quand le dépôt sera public -->
+    <li><span>Code <small>soon</small></span></li>
+    <li><a href="#citation">BibTeX</a></li>
+  </ul>
+
+  <!-- ============ VIDÉOS ============ -->
+  <!-- Pour changer une vidéo : déposer static/vid_XXXXXX.mp4 et modifier data-src et la légende.
+       Une vidéo absente affiche « Video coming soon » au lieu d'une case vide. -->
+  <div class="teaser">
+    <figure>
+      <div class="frame"><video data-src="static/vid_000031.mp4" muted loop playsinline preload="none" aria-label="5 yellow cubes, moving camera"></video><span class="missing">Video coming soon</span></div>
+      <figcaption>5 yellow cubes</figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><video data-src="static/vid_001001.mp4" muted loop playsinline preload="none" aria-label="20 red cubes, moving camera"></video><span class="missing">Video coming soon</span></div>
+      <figcaption>20 red cubes</figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><video data-src="static/vid_002572.mp4" muted loop playsinline preload="none" aria-label="50 blue spheres, moving camera"></video><span class="missing">Video coming soon</span></div>
+      <figcaption>50 blue spheres</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ RÉSUMÉ ============ -->
+  <p class="lead">CountVideoBench is a diagnostic benchmark for object counting in video-language models. Counting questions in existing video benchmarks concentrate on a few small values, so average accuracy hides how models behave on less frequent counts. CountVideoBench contains 2,600 synthetic videos spread evenly over 26 counts between 5 and 50, each showing a single class of static objects under a moving camera. Across sixteen models, none exceeds 27.6% Exact Match. Accuracy does not simply decrease as counts grow: models concentrate their answers on a few preferred values, with accuracy peaks at those values and collapses at neighbouring counts.</p>
+
   <hr>
 
-  <h2>Release</h2>
+  <!-- ============ DATASET ============ -->
+  <section id="dataset">
+    <h2>Dataset</h2>
+    <div class="row"><span class="what">Videos</span><span class="val">2,600, with 100 per count</span></div>
+    <div class="row"><span class="what">Counts</span><span class="val">26 between 5 and 50, in groups of consecutive values <span class="m block">5–12 · 18–22 · 28–32 · 38–42 · 48–50</span></span></div>
+    <div class="row"><span class="what">Objects</span><span class="val">One class per video: cube or sphere, in five colours</span></div>
+    <div class="row"><span class="what">Scene</span><span class="val">Static objects, moving camera</span></div>
+    <div class="row"><span class="what">Format</span><span class="val"><span class="m">MP4 · 1920×1080 · 30 fps · 5 s</span></span></div>
+    <div class="row"><span class="what">Ground truth</span><span class="val">Exact, from the generator</span></div>
+    <div class="row"><span class="what">License</span><span class="val"><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> <span class="m">· 139 GB</span></span></div>
+  </section>
 
-  <div class="row">
-    <span class="what">Paper</span>
-    <!-- TODO : remplacer par le lien vers les actes ou l'arXiv dès qu'il existe -->
-    <span class="when">BMVC 2026 proceedings</span>
-  </div>
-  <div class="row">
-    <span class="what">Dataset</span>
-    <!-- TODO : remplacer par le lien Hugging Face, et préciser le mois -->
-    <span class="when">Coming before the conference</span>
-  </div>
-  <div class="row">
-    <span class="what">Code</span>
-    <!-- TODO : décommenter quand le dépôt sera public
-    <a href="https://github.com/CountVideoBench/CountVideoBench">github.com/CountVideoBench</a> -->
-    <span class="when">Coming before the conference</span>
-  </div>
+  <hr>
+
+  <!-- ============ QUICK START ============ -->
+  <section id="quick-start">
+    <h2>Quick start</h2>
+    <p>CountVideoBench is hosted on the <a href="https://huggingface.co/datasets/countvideobench/CountVideoBench">Hugging Face Hub</a>. Load it in Python with the <a href="https://huggingface.co/docs/datasets"><code>datasets</code></a> library, or download the video files with the Hugging Face command-line tool <a href="https://huggingface.co/docs/huggingface_hub/guides/cli"><code>hf</code></a>. One install provides both, and the dataset is public: no account is needed.</p>
+
+    <div class="code">
+      <div class="label">Install</div>
+      <button class="copy" type="button" data-copy="inst">Copy</button>
+<pre id="inst">pip install -U datasets</pre>
+    </div>
+
+    <div class="code">
+      <div class="label">Python · datasets</div>
+      <button class="copy" type="button" data-copy="py">Copy</button>
+<pre id="py"><span class="k">from</span> datasets <span class="k">import</span> load_dataset, Video
+
+<span class="c"># Downloads the full dataset (139 GB) on first call</span>
+ds = load_dataset(<span class="s">"countvideobench/CountVideoBench"</span>, <span class="s">"single_class"</span>, split=<span class="s">"test"</span>)
+<span class="c"># Keep file paths instead of decoded videos, to sample frames your own way</span>
+ds = ds.cast_column(<span class="s">"video"</span>, Video(decode=<span class="k">False</span>))
+
+sample = ds[0]
+print(sample[<span class="s">"question"</span>], sample[<span class="s">"count"</span>], sample[<span class="s">"video"</span>][<span class="s">"path"</span>])</pre>
+    </div>
+
+    <div class="code">
+      <div class="label">Command line · hf</div>
+      <button class="copy" type="button" data-copy="sh">Copy</button>
+<pre id="sh"><span class="c"># All 2,600 videos</span>
+hf download countvideobench/CountVideoBench --repo-type dataset --local-dir CountVideoBench
+
+<span class="c"># Or one count only, e.g. the 100 videos with 20 objects</span>
+hf download countvideobench/CountVideoBench --repo-type dataset --local-dir CountVideoBench \
+  --include <span class="s">"single_class/metadata.csv"</span> <span class="s">"single_class/20_entities/*"</span></pre>
+    </div>
+
+    <p class="note">Use the <code>question</code> field as the prompt to compare with the paper.</p>
+  </section>
+
+  <hr>
+
+  <!-- ============ COMPARAISON ============ -->
+  <section id="comparison">
+    <h2>Comparison with existing benchmarks</h2>
+    <p class="lead">In each of the nine video benchmarks below, at least 72% of counting questions have an answer of 10 or less. CountVideoBench gives every count between 5 and 50 the same weight.</p>
+    <div class="dists" id="dists"></div>
+    <p class="caption">Distribution of ground-truth counts in each benchmark, each row scaled to its own maximum. The shaded area covers counts 0 to 10; counts above 50 are grouped in the last bar.</p>
+  </section>
+
+  <hr>
+
+  <!-- ============ RÉSULTATS ============ -->
+  <section id="results">
+    <h2>Results</h2>
+    <p class="lead">Sixteen video-language models from nine families, evaluated zero-shot on ten uniformly sampled frames per video.</p>
+
+    <div class="scroll">
+      <table class="heat" id="heat" aria-label="Exact Match by ground-truth count and model"></table>
+    </div>
+    <div class="legend"><span>0%</span><span class="ramp"></span><span>100%</span></div>
+    <p class="caption">Exact Match by ground-truth count, over all 2,600 videos.</p>
+
+    <div class="scroll sub">
+      <table class="res" id="res">
+        <thead>
+          <tr><th>Model</th><th>EM</th><th>Acc@10%</th><th>MAE</th><th>RMSE</th><th>Coverage</th><th>|S|</th><th>PP</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="caption">EM, Acc@10% and Coverage in percent; MAE and RMSE in objects, over answered videos. |S|: number of distinct values predicted; PP: prediction perplexity. Bold marks the best value per column. † answers only 1.3% of videos and is not ranked on MAE and RMSE.</p>
+
+    <p class="sub">On a 104-video subset, 20 human participants reach 90.8% Exact Match, against 26.9% for the best models on the same videos.</p>
+    <!-- Tableau mis à jour à la main : soumissions par e-mail -->
+    <p class="note">To add your model to the table, send its predictions to <a href="mailto:marc.chapus@liris.cnrs.fr">marc.chapus@liris.cnrs.fr</a>.</p>
+  </section>
+
+  <hr>
+
+  <!-- ============ CITATION ============ -->
+  <section id="citation">
+    <h2>Citation</h2>
+    <div class="code">
+      <button class="copy" type="button" data-copy="bib">Copy</button>
+<pre id="bib">@inproceedings{chapus2026countvideobench,
+  author    = {Chapus, Marc and Crispim-Junior, Carlos and Eglin, V{\'e}ronique and Baskurt, Atilla},
+  title     = {{CountVideoBench}: A Benchmark to Evaluate Prediction Biases on the Object Counting task by Video-Language Models},
+  booktitle = {37th British Machine Vision Conference 2026, {BMVC} 2026, Lancaster, UK, November 23-26, 2026},
+  publisher = {BMVA},
+  year      = {2026}
+}</pre>
+    </div>
+  </section>
 
   <footer>
     <a href="mailto:marc.chapus@liris.cnrs.fr">marc.chapus@liris.cnrs.fr</a>
   </footer>
 
 </main>
+
+<script>
+/* ---------- Données de l'article ---------- */
+var COUNTS = [5,6,7,8,9,10,11,12,18,19,20,21,22,28,29,30,31,32,38,39,40,41,42,48,49,50];
+
+/* Table 2 : [modèle, EM, Acc@10, MAE, RMSE, Coverage, |S|, PP, étiquette], trié par EM */
+var TABLE = [
+  ["Gemini-3.1-pro",   27.6, 55.3, 3.1,  5.3, 97.7, 55, 39.0, "proprietary"],
+  ["LLaVA-Video-7B",   26.8, 56.3, 3.7,  6.1, 98.9, 16,  8.0],
+  ["GPT-5.4",          25.7, 70.5, 1.7,  2.4,100.0, 48, 30.6, "proprietary"],
+  ["Qwen3-VL-32B",     23.6, 44.9, 6.4, 53.0, 89.2, 88, 41.9],
+  ["Qwen3-VL-8B",      18.7, 47.7, 3.4,  5.5,100.0, 31, 17.7],
+  ["AdaReTaKe-72B",    16.6, 39.0, 4.2,  6.1, 97.1, 27, 12.3],
+  ["InternVL2.5-78B",  15.8, 23.4, 4.5,  8.5, 49.7, 17,  5.9],
+  ["AdaReTaKe-7B",     15.1, 34.2, 4.4,  6.7, 90.2, 26, 11.1],
+  ["LLaVA-Video-72B",  14.1, 27.8, 2.5,  3.4, 69.1, 21, 10.5],
+  ["InternVL2.5-8B",   14.0, 38.2,15.8, 28.5, 97.9, 16,  9.4],
+  ["NVILA-15B",        12.5, 45.4, 3.5,  6.1,100.0, 27, 14.3],
+  ["NVILA-8B",          6.6, 24.5, 5.9,  9.1,100.0, 26, 12.8],
+  ["VideoLLaMA2-72B",   5.4,  7.8,16.4,131.5, 71.1, 24,  8.4],
+  ["Qwen2.5-VL-72B",    3.9,  8.9, 7.3,  9.5, 81.8, 30, 17.3],
+  ["Qwen2.5-VL-7B",     1.9,  6.1, 8.4, 11.3, 73.2, 32, 10.7],
+  ["VideoLLaMA2-7B†",   0.1,  0.1, 1.9,  2.3,  1.3,  5,  1.1]
+];
+
+/* Fig. 4 : Exact Match (%) par cardinalité, 2 600 vidéos */
+var HEAT = {
+  "AdaReTaKe-72B":  [79,55,19,33,4,73,0,28,11,0,78,1,0,0,0,34,0,0,0,0,4,0,0,0,0,13],
+  "AdaReTaKe-7B":   [45,58,37,28,7,46,0,26,18,0,81,0,0,0,0,39,0,0,0,0,6,0,0,0,1,0],
+  "GPT-5.4":        [95,92,76,71,39,47,23,11,10,1,7,1,7,6,22,0,38,0,10,38,13,0,11,0,33,17],
+  "Gemini-3.1-pro": [93,88,79,86,65,73,47,42,18,11,17,10,11,14,7,11,3,4,5,1,8,2,5,7,2,8],
+  "InternVL2.5-78B":[95,76,23,55,19,41,0,41,5,0,52,0,0,0,0,2,0,0,0,0,0,0,0,0,0,1],
+  "InternVL2.5-8B": [13,12,3,23,2,91,0,52,0,0,84,0,0,0,0,84,0,0,0,0,0,0,0,0,0,0],
+  "LLaVA-Video-72B":[87,60,49,42,97,6,0,3,1,0,7,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0],
+  "LLaVA-Video-7B": [99,52,71,65,41,49,0,87,1,0,95,0,0,0,0,43,0,0,0,0,0,0,0,0,0,94],
+  "NVILA-15B":      [25,21,1,4,0,10,2,34,21,0,29,0,0,0,0,54,0,0,0,0,59,0,0,15,2,49],
+  "NVILA-8B":       [8,0,0,1,0,1,0,0,0,0,3,0,0,0,0,40,0,0,0,0,36,0,0,0,0,82],
+  "Qwen2.5-VL-72B": [19,34,4,12,0,5,0,6,0,0,4,0,0,0,0,8,0,0,0,0,4,0,2,2,0,2],
+  "Qwen2.5-VL-7B":  [9,11,3,1,0,0,0,0,0,0,1,0,0,0,0,19,0,0,0,0,6,0,0,0,0,0],
+  "Qwen3-VL-32B":   [86,82,68,77,33,77,7,34,15,6,19,12,14,9,2,19,1,8,3,1,20,1,1,10,0,8],
+  "Qwen3-VL-8B":    [54,47,41,32,15,30,4,22,31,0,58,0,0,0,0,81,0,0,1,0,7,0,0,12,0,50],
+  "VideoLLaMA2-72B":[47,16,3,3,41,0,0,23,3,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "VideoLLaMA2-7B": [0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+};
+
+/* Distributions des benchmarks (distributions_benchmark/*.csv).
+   [nom, nombre de questions, % de réponses <= 10, % par cardinalité 0..50, puis > 50] */
+var DISTS = [["CLEVRER",20000,100,[24.82,27.84,23.07,16.14,7.88,0.23,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],["MVBench",400,100,[10.25,11.25,20.75,33.25,12.5,1.5,5.5,4.25,0.5,0.25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],["TGIF-QA",3554,100,[25.83,0,25.72,16.38,11.09,6.25,4.53,2.39,2.05,1.15,4.61,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],["VLM4D",254,99,[31.1,30.71,16.14,8.27,8.27,2.76,0.39,0,0.79,0,0.39,0.39,0,0,0,0,0,0,0,0,0.39,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.39]],["NExT-QA",320,98,[0,14.69,38.12,19.69,10.31,7.5,5,0.62,1.88,0.62,0,0.62,0.31,0.31,0,0.31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],["VideoCount",652,98,[0,72.09,14.88,6.13,1.99,0.77,1.23,0.31,0.46,0.15,0.15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.15,0.15,0,0,0,0,0,0,0,0,0.15,0.15,0,0,0,0,0,0,0,0,0,0,0,0,1.23]],["Video-MME",243,93,[1.65,5.76,18.93,20.99,13.58,9.88,8.64,6.17,2.06,3.29,1.65,1.23,0.82,0,0.41,0.82,0.41,0,0,0,0,0.41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.41,0,0,0,0,0,0,0,0,0,0,0,0,0,2.88]],["CG-AV-Counting",1027,90,[0,3.7,17.62,17.43,14.51,11.3,9.44,5.45,5.26,2.53,2.34,1.07,2.24,1.56,1.17,0.49,0.49,0.29,0.49,0.19,0.29,0.29,0.1,0.39,0.49,0.19,0,0,0.1,0,0,0,0,0.1,0,0.19,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.1]],["VCBench",289,72,[0,2.08,13.15,16.96,15.22,10.38,4.15,3.11,2.77,1.73,2.77,1.38,2.08,0.35,1.73,1.38,2.42,3.11,2.42,2.42,1.04,0,1.73,0.69,0.35,1.04,1.04,1.04,0.35,0.69,0,0.35,0,0.35,0,0,0.69,0,0.35,0,0.35,0,0,0,0,0,0,0.35,0,0,0,0]]];
+/* CountVideoBench : 100 vidéos sur chacune des 26 cardinalités */
+(function(){
+  var p = []; for (var i = 0; i <= 51; i++) p.push(COUNTS.indexOf(i) >= 0 ? 100 / 26 : 0);
+  DISTS.push(["CountVideoBench", 2600, 23, p, true]);
+})();
+
+/* ---------- Copier ---------- */
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var text = document.getElementById(btn.dataset.copy).innerText;
+    var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, function(){ fallback(text); done(); });
+    } else { fallback(text); done(); }
+  });
+});
+function fallback(text){
+  var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} ta.remove();
+}
+
+/* ---------- Vidéos : chargement et lecture quand elles sont visibles ---------- */
+var videos = document.querySelectorAll('.frame video');
+videos.forEach(function(v){
+  v.addEventListener('error', function(){ v.closest('figure').classList.add('is-missing'); });
+});
+function load(v){ if (!v.src) { v.src = v.dataset.src; } }
+if ('IntersectionObserver' in window) {
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      var v = e.target;
+      if (e.isIntersecting) { load(v); var p = v.play(); if (p && p.catch) p.catch(function(){}); }
+      else if (!v.paused) { v.pause(); }
+    });
+  }, { rootMargin: '200px 0px' });
+  videos.forEach(function(v){ io.observe(v); });
+} else {
+  videos.forEach(function(v){ load(v); v.autoplay = true; if (v.play) v.play().catch(function(){}); });
+}
+
+/* ---------- Distributions : une ligne par benchmark, axe X commun ---------- */
+(function(){
+  var box = document.getElementById('dists'), NS = 'http://www.w3.org/2000/svg';
+  var SLOTS = 55, H = 40;                         /* 51 valeurs (0..50), trois espaces, la barre > 50 */
+  var pos = function(i){ return i <= 50 ? i : 54; };
+  function row(cls, a, b, c){
+    var r = document.createElement('div'); r.className = 'drow' + (cls ? ' ' + cls : '');
+    [a, b, c].forEach(function(x){ r.appendChild(x); });
+    box.appendChild(r);
+  }
+  function span(cls, text){ var s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
+
+  row('head', span('name', ''), span('', ''), span('share', '≤ 10'));
+
+  DISTS.forEach(function(d){
+    var max = Math.max.apply(null, d[3]);
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + SLOTS + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', d[0] + ': ' + d[2] + '% of questions have a count of 10 or less');
+    function el(tag, attrs){ var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; }
+    el('rect', { class:'zone', x:0, y:0, width:11, height:H });
+    d[3].forEach(function(p, i){
+      if (p <= 0) return;
+      var h = Math.max((p / max) * (H - 2), 1.2);
+      var r = el('rect', { class:'b', x:pos(i) + 0.14, y:H - h, width:0.72, height:h });
+      var t = document.createElementNS(NS, 'title');
+      t.textContent = (i <= 50 ? 'Count ' + i : 'Count > 50') + ': ' + p.toFixed(1) + '% of questions';
+      r.appendChild(t);
+    });
+    row(d[4] ? 'ours' : '', span('name', d[0]), svg, span('share', d[2] + '%'));
+  });
+
+  var ticks = document.createElement('div'); ticks.className = 'ticks';
+  [0,10,20,30,40,50].forEach(function(t){
+    var s = span('', t); s.style.left = ((t + 0.5) / SLOTS * 100) + '%'; ticks.appendChild(s);
+  });
+  var e = span('end', '>50'); e.style.left = '100%'; ticks.appendChild(e);
+  row('axis', span('name', ''), ticks, span('share', ''));
+})();
+
+/* ---------- Heatmap : modèles seuls, colonnes regroupées ---------- */
+(function(){
+  var t = document.getElementById('heat');
+  var GROUP_START = [18, 28, 38, 48];
+  function color(p){
+    var a = [243,245,248], b = [47,99,184], k = Math.pow(p / 100, 0.8);
+    return 'rgb(' + a.map(function(c, i){ return Math.round(c + (b[i] - c) * k); }).join(',') + ')';
+  }
+  var head = '<thead><tr><th></th>' + COUNTS.map(function(n){
+    return (GROUP_START.indexOf(n) >= 0 ? '<th class="gap"></th>' : '') + '<th scope="col">' + n + '</th>';
+  }).join('') + '</tr></thead>';
+  var body = '<tbody>';
+  TABLE.forEach(function(r){
+    var name = r[0].replace('†', ''), vals = HEAT[name];
+    body += '<tr><th scope="row">' + name + '</th>' + vals.map(function(v, i){
+      return (GROUP_START.indexOf(COUNTS[i]) >= 0 ? '<td class="gap"></td>' : '') +
+        '<td style="background:' + color(v) + ';color:' + (v >= 55 ? '#fff' : (v === 0 ? '#C3C9D2' : '#14171C')) +
+        '" title="' + name + ', ' + COUNTS[i] + ' objects: ' + v + '%">' + v + '</td>';
+    }).join('') + '</tr>';
+  });
+  t.innerHTML = head + body + '</tbody>';
+})();
+
+/* ---------- Tableau des résultats ---------- */
+(function(){
+  var tb = document.querySelector('#res tbody');
+  var ranked = TABLE.filter(function(r){ return r[0].indexOf('†') < 0; });
+  var col = function(rows, c){ return rows.map(function(r){ return r[c]; }); };
+  var best = {
+    1: Math.max.apply(null, col(TABLE, 1)),
+    2: Math.max.apply(null, col(TABLE, 2)),
+    3: Math.min.apply(null, col(ranked, 3)),
+    4: Math.min.apply(null, col(ranked, 4)),
+    5: Math.max.apply(null, col(TABLE, 5))
+  };
+  var html = '';
+  TABLE.forEach(function(r){
+    var dagger = r[0].indexOf('†') >= 0;
+    html += '<tr><td>' + r[0] + (r[8] ? '<span class="tag">' + r[8] + '</span>' : '') + '</td>';
+    for (var c = 1; c <= 7; c++) {
+      var v = (c === 6) ? String(r[c]) : r[c].toFixed(1);
+      var isBest = best[c] !== undefined && r[c] === best[c] && !(dagger && (c === 3 || c === 4));
+      html += '<td>' + (isBest ? '<strong>' + v + '</strong>' : v) + '</td>';
+    }
+    html += '</tr>';
+  });
+  html += '<tr class="oracle"><td>Oracle</td><td>100.0</td><td>100.0</td><td>0.0</td><td>0.0</td><td>100.0</td><td>26</td><td>26.0</td></tr>';
+  tb.innerHTML = html;
+})();
+</script>
 </body>
 </html>
