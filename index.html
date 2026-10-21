@@ -260,11 +260,9 @@
   <p class="affil">INSA Lyon, Université Lumière Lyon 2, CNRS, Université Claude Bernard Lyon 1, LIRIS, UMR5205, Villeurbanne, France</p>
 
   <ul class="links">
-    <!-- TODO : remplacer par <a href="https://arxiv.org/abs/XXXX.XXXXX">Paper</a> dès que l'arXiv existe -->
-    <li><span>Paper <small>soon</small></span></li>
+    <li><a href="https://arxiv.org/abs/2610.28356">Paper <small>arXiv</small></a></li>
     <li><a href="https://huggingface.co/datasets/countvideobench/CountVideoBench">Dataset <small>Hugging Face</small></a></li>
-    <!-- TODO : remplacer par <a href="https://github.com/CountVideoBench/CountVideoBench">Code</a> quand le dépôt sera public -->
-    <li><span>Code <small>soon</small></span></li>
+    <li><a href="https://github.com/CountVideoBench/CountVideoBench">Code <small>GitHub</small></a></li>
     <li><a href="#citation">BibTeX</a></li>
   </ul>
 
@@ -341,7 +339,7 @@ hf download countvideobench/CountVideoBench --repo-type dataset --local-dir Coun
   --include <span class="s">"single_class/metadata.csv"</span> <span class="s">"single_class/20_entities/*"</span></pre>
     </div>
 
-    <p class="note">Use the <code>question</code> field as the prompt to compare with the paper.</p>
+    <p class="note">Use the <code>question</code> field as the prompt to compare with the paper. The <a href="https://github.com/CountVideoBench/CountVideoBench">evaluation code</a> reproduces the paper's results and includes a template to evaluate your own model.</p>
   </section>
 
   <hr>
@@ -375,11 +373,11 @@ hf download countvideobench/CountVideoBench --repo-type dataset --local-dir Coun
         <tbody></tbody>
       </table>
     </div>
-    <p class="caption">EM, Acc@10% and Coverage in percent; MAE and RMSE in objects, over answered videos. |S|: number of distinct values predicted; PP: prediction perplexity. Bold marks the best value per column. † answers only 1.3% of videos and is not ranked on MAE and RMSE.</p>
+    <p class="caption">EM, Acc@10% and Coverage in percent; MAE and RMSE in objects, over answered videos. |S|: number of distinct values predicted; PP: prediction perplexity. Bold marks the best EM, Acc@10%, MAE and RMSE. † answers only 1.2% of videos and is not ranked on MAE and RMSE.</p>
 
     <p class="sub">On a 104-video subset, 20 human participants reach 90.8% Exact Match, against 26.9% for the best models on the same videos.</p>
     <!-- Tableau mis à jour à la main : soumissions par e-mail -->
-    <p class="note">To add your model to the table, send its predictions to <a href="mailto:marc.chapus@liris.cnrs.fr">marc.chapus@liris.cnrs.fr</a>.</p>
+    <p class="note">To add your model to the table, run it with the <a href="https://github.com/CountVideoBench/CountVideoBench">evaluation code</a> and send the resulting CSV to <a href="mailto:marc.chapus@liris.cnrs.fr">marc.chapus@liris.cnrs.fr</a>.</p>
   </section>
 
   <hr>
@@ -409,29 +407,31 @@ hf download countvideobench/CountVideoBench --repo-type dataset --local-dir Coun
 /* ---------- Données de l'article ---------- */
 var COUNTS = [5,6,7,8,9,10,11,12,18,19,20,21,22,28,29,30,31,32,38,39,40,41,42,48,49,50];
 
-/* Table 2 : [modèle, EM, Acc@10, MAE, RMSE, Coverage, |S|, PP, étiquette], trié par EM */
+/* Table 2 de l'article : [modèle, EM, Acc@10, MAE, RMSE, Coverage, |S|, PP, étiquette], trié par EM.
+   Recalculé depuis eval/paper_results/ du dépôt GitHub. */
 var TABLE = [
-  ["Gemini-3.1-pro",   27.6, 55.3, 3.1,  5.3, 97.7, 55, 39.0, "proprietary"],
-  ["LLaVA-Video-7B",   26.8, 56.3, 3.7,  6.1, 98.9, 16,  8.0],
-  ["GPT-5.4",          25.7, 70.5, 1.7,  2.4,100.0, 48, 30.6, "proprietary"],
-  ["Qwen3-VL-32B",     23.6, 44.9, 6.4, 53.0, 89.2, 88, 41.9],
-  ["Qwen3-VL-8B",      18.7, 47.7, 3.4,  5.5,100.0, 31, 17.7],
-  ["AdaReTaKe-72B",    16.6, 39.0, 4.2,  6.1, 97.1, 27, 12.3],
-  ["InternVL2.5-78B",  15.8, 23.4, 4.5,  8.5, 49.7, 17,  5.9],
-  ["AdaReTaKe-7B",     15.1, 34.2, 4.4,  6.7, 90.2, 26, 11.1],
-  ["LLaVA-Video-72B",  14.1, 27.8, 2.5,  3.4, 69.1, 21, 10.5],
-  ["InternVL2.5-8B",   14.0, 38.2,15.8, 28.5, 97.9, 16,  9.4],
-  ["NVILA-15B",        12.5, 45.4, 3.5,  6.1,100.0, 27, 14.3],
-  ["NVILA-8B",          6.6, 24.5, 5.9,  9.1,100.0, 26, 12.8],
-  ["VideoLLaMA2-72B",   5.4,  7.8,16.4,131.5, 71.1, 24,  8.4],
-  ["Qwen2.5-VL-72B",    3.9,  8.9, 7.3,  9.5, 81.8, 30, 17.3],
-  ["Qwen2.5-VL-7B",     1.9,  6.1, 8.4, 11.3, 73.2, 32, 10.7],
-  ["VideoLLaMA2-7B†",   0.1,  0.1, 1.9,  2.3,  1.3,  5,  1.1]
+  ["Gemini-3.1-pro",   27.6,  55.3,   3.1,   5.2,  97.7, 55,  38.9, "proprietary"],
+  ["LLaVA-Video-7B",   26.8,  56.3,   3.7,   6.1,  98.9, 16,   8.0],
+  ["GPT-5.4",          25.7,  70.5,   1.7,   2.4, 100.0, 48,  30.6, "proprietary"],
+  ["Qwen3-VL-32B",     22.1,  39.4,   4.5,   9.3,  75.1, 83,  27.8],
+  ["Qwen3-VL-8B",      18.7,  47.7,   3.4,   5.5, 100.0, 31,  17.7],
+  ["AdaReTaKe-72B",    16.7,  39.1,   4.2,   6.2,  97.5, 27,  12.3],
+  ["InternVL2.5-78B",  15.8,  23.4,   4.5,   8.5,  49.7, 17,   5.9],
+  ["AdaReTaKe-7B",     15.1,  34.4,   4.5,   6.8,  91.1, 28,  11.3],
+  ["LLaVA-Video-72B",  14.1,  27.8,   2.5,   3.4,  69.1, 21,  10.5],
+  ["InternVL2.5-8B",   14.0,  38.2,  15.8,  28.5,  97.9, 16,   9.4],
+  ["NVILA-15B",        12.5,  45.4,   3.5,   6.1, 100.0, 27,  14.3],
+  ["NVILA-8B",          6.6,  24.5,   5.9,   9.1, 100.0, 26,  12.8],
+  ["VideoLLaMA2-72B",   5.0,   7.6,  11.9,  17.8,  71.1, 25,   8.9],
+  ["Qwen2.5-VL-72B",    3.9,   8.9,   7.4,  10.0,  82.2, 31,  17.6],
+  ["Qwen2.5-VL-7B",     1.9,   6.1,   8.6,  11.8,  73.7, 32,  10.9],
+  ["VideoLLaMA2-7B†",   0.1,   0.1,   1.7,   1.9,   1.2,  5,   1.1]
 ];
 
-/* Fig. 4 : Exact Match (%) par cardinalité, 2 600 vidéos */
+/* Fig. 4 de l'article : Exact Match (%) par cardinalité, 2 600 vidéos.
+   Recalculé depuis eval/paper_results/ du dépôt GitHub. */
 var HEAT = {
-  "AdaReTaKe-72B":  [79,55,19,33,4,73,0,28,11,0,78,1,0,0,0,34,0,0,0,0,4,0,0,0,0,13],
+  "AdaReTaKe-72B":  [79,55,19,33,4,73,0,28,11,0,78,1,0,0,0,34,0,0,0,0,4,0,0,0,0,16],
   "AdaReTaKe-7B":   [45,58,37,28,7,46,0,26,18,0,81,0,0,0,0,39,0,0,0,0,6,0,0,0,1,0],
   "GPT-5.4":        [95,92,76,71,39,47,23,11,10,1,7,1,7,6,22,0,38,0,10,38,13,0,11,0,33,17],
   "Gemini-3.1-pro": [93,88,79,86,65,73,47,42,18,11,17,10,11,14,7,11,3,4,5,1,8,2,5,7,2,8],
@@ -443,9 +443,9 @@ var HEAT = {
   "NVILA-8B":       [8,0,0,1,0,1,0,0,0,0,3,0,0,0,0,40,0,0,0,0,36,0,0,0,0,82],
   "Qwen2.5-VL-72B": [19,34,4,12,0,5,0,6,0,0,4,0,0,0,0,8,0,0,0,0,4,0,2,2,0,2],
   "Qwen2.5-VL-7B":  [9,11,3,1,0,0,0,0,0,0,1,0,0,0,0,19,0,0,0,0,6,0,0,0,0,0],
-  "Qwen3-VL-32B":   [86,82,68,77,33,77,7,34,15,6,19,12,14,9,2,19,1,8,3,1,20,1,1,10,0,8],
+  "Qwen3-VL-32B":   [86,82,68,77,33,77,6,34,11,3,11,5,7,5,1,18,0,7,2,2,20,1,2,10,0,7],
   "Qwen3-VL-8B":    [54,47,41,32,15,30,4,22,31,0,58,0,0,0,0,81,0,0,1,0,7,0,0,12,0,50],
-  "VideoLLaMA2-72B":[47,16,3,3,41,0,0,23,3,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "VideoLLaMA2-72B":[44,15,1,8,37,0,0,15,2,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   "VideoLLaMA2-7B": [0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 };
 
@@ -566,8 +566,7 @@ if ('IntersectionObserver' in window) {
     1: Math.max.apply(null, col(TABLE, 1)),
     2: Math.max.apply(null, col(TABLE, 2)),
     3: Math.min.apply(null, col(ranked, 3)),
-    4: Math.min.apply(null, col(ranked, 4)),
-    5: Math.max.apply(null, col(TABLE, 5))
+    4: Math.min.apply(null, col(ranked, 4))
   };
   var html = '';
   TABLE.forEach(function(r){
